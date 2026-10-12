@@ -22,7 +22,27 @@ Fill this in once. A worker with context knows. A worker without it guesses.
 
 | When the operator asks for... | Use this |
 |---|---|
-| <!-- TODO(author): one row per slash command --> | `/...` |
+| What needs doing | `/attention` |
+| Tier progress this period | `/progress` |
+| Who is close to the next tier | `/near-tier` |
+| What more sales would earn | `/what-if` |
+| Periods to calculate | `/to-calculate then /calculate` |
+| Approve or pay a rebate | `/approve, /pay, /credit-note` |
+| What we owe on rebates, month end | `/accruals, /month-end` |
+| Claims and deductions | `/unmatched-claims, then /match, /dispute or /write-off` |
+| Agreements ending or unsigned | `/agreement-watch` |
+| Rule checks | `/compliance` |
+| Rebate cost by account | `/rebate-cost` |
+| Buying group members | `/member-share` |
+| Accounts gone quiet | `/quiet-accounts` |
+| The Monday review | `/weekly-review` |
+| A statement for a customer | `/draft-statement` |
+| Reply to a claim | `/draft-claim-reply` |
+| Add a record | `/add` |
+| Bring Salesforce data across | `/import` |
+| Back up | `/export` |
+| Change how it works | `/customise` |
+| A new report | `/new-view` |
 
 If an ask fits nothing here, run the CLI directly (`npm run <cli> -- --help`) and then propose a new command for it.
 
@@ -32,6 +52,15 @@ If an ask fits nothing here, run the CLI directly (`npm run <cli> -- --help`) an
 - Never delete records without an explicit yes in this session. Prefer marking closed or archived.
 - Never invent a record. If a name is ambiguous, list the candidates and ask.
 - The database is the source of truth. If the answer is not in it, say so.
+
+## Rebate rules
+
+- Amounts exclude GST and are in the account's currency (NZD for NZ, AUD for AU). Never add NZD to AUD.
+- A settlement is approved by a different person from whoever calculated it. Never approve on the operator's behalf with someone else's name.
+- Never calculate a period that has not ended. Never change a rate or tier without the signed terms or the operator's say-so.
+- A claim is matched only when it agrees with the settlement. A deduction with no agreement behind it is raised with the customer, not written off quietly.
+- Read docs/compliance.md before reporting rule checks. They are prompts, not legal or tax advice.
+- The demo data is fictional. Never present it as real.
 
 ## Where things live
 

@@ -1,11 +1,25 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "rebate-statement",
+    "title": "Rebate statement",
+    "for_each": "select s.id, a.name||' '||s.period_start as name from settlements s join agreements g on g.id=s.agreement_id join accounts a on a.id=g.account_id order by s.period_start",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      { "title": "Agreement", "sql": "select a.name as customer, g.name as agreement, s.period_start, s.period_end, case a.country when 'AU' then 'AUD' else 'NZD' end as currency from settlements s join agreements g on g.id=s.agreement_id join accounts a on a.id=g.account_id where s.id=$1" },
+      { "title": "Qualifying sales by product", "sql": "select p.code, p.name, sum(x.units) as units, sum(x.net_value) as net_sales from settlements s join agreements g on g.id=s.agreement_id join sales x on x.invoice_date between s.period_start and s.period_end join accounts a on a.id=x.account_id join products p on p.id=x.product_id where s.id=$1 and (x.account_id=g.account_id or a.parent_id=g.account_id) and (g.category is null or lower(p.category)=lower(g.category)) group by p.code, p.name order by p.code" },
+      { "title": "Calculation", "note": "Amounts exclude GST.", "sql": "select measure as qualifying, rate, calculated, adjustment, adjustment_reason, total as rebate_due, state, payment_ref, credit_note_ref from settlements where id=$1" }
+    ]
+  },
+  {
+    "name": "agreement-schedule",
+    "title": "Rebate agreement schedule",
+    "for_each": "select g.id, g.name from agreements g where g.state<>'draft' order by g.name",
+    "file": "name",
+    "sections": [
+      { "title": "Terms", "sql": "select a.name as customer, g.kind, g.rate_type, g.period, g.starts, g.ends, g.category, g.baseline, g.settle_within_days, g.settlement_method, g.signed_document from agreements g join accounts a on a.id=g.account_id where g.id=$1" },
+      { "title": "Tiers", "sql": "select threshold, rate from rebate_tiers where agreement_id=$1 order by threshold" },
+      { "title": "This period", "sql": "select period_start, period_end, measure, rate, earned_to_date, next_threshold, gap_to_next from tier_progress where id=$1" },
+      { "title": "Settlements", "sql": "select period_start, period_end, total, state, paid_on, payment_ref from settlements where agreement_id=$1 order by period_start" }
     ]
   }
 ]

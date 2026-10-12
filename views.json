@@ -1,14 +1,24 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Rebates for Claude Code: what needs attention, rendered by npm run view",
+    "title": "Rebates this week",
+    "subtitle": "What needs doing, who is close to a tier, and what is waiting on payment",
     "sections": [
-      {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
-      }
+      { "title": "Needs attention", "sql": "select kind, account, item, detail from (select 'calculate' as kind,account,agreement as item,'Settle by '||settle_by as detail from to_calculate union all select 'pay',account,agreement,state||', settle by '||settle_by from payout_queue where settle_by<=current_date+7 union all select 'claim',account,reference,finding from unmatched_claims where finding<>'Ready to match' union all select 'agreement',account,agreement,issue from agreement_watch union all select 'rule',account,record,issue from compliance_gaps) x order by kind, account" },
+      { "title": "Tier progress this period", "note": "Projected is the period's total at the current pace.", "sql": "select account, agreement, currency, days_left, measure, rate, earned_to_date, next_threshold, gap_to_next, projected from tier_progress order by account" },
+      { "title": "Waiting on approval or payment", "sql": "select account, agreement, period_start, total, state, settle_by from payout_queue order by settle_by" },
+      { "title": "Claims to resolve", "sql": "select account, reference, claimed_on, amount, settled, finding, days_open from unmatched_claims order by days_open desc" }
+    ]
+  },
+  {
+    "name": "month-end",
+    "title": "Rebate accrual",
+    "subtitle": "What the business owes on rebates today, for the month-end journal",
+    "sections": [
+      { "title": "Liability by agreement", "sql": "select account, agreement, currency, settled_unpaid, not_yet_calculated, open_period_to_date, liability from accruals order by liability desc" },
+      { "title": "Total by currency", "sql": "select currency, sum(liability) as liability from accruals group by currency order by currency" },
+      { "title": "Rebate cost, last 12 months", "sql": "select a.name as account, coalesce(sum(s.total),0) as rebates_paid from accounts a join agreements g on g.account_id=a.id left join settlements s on s.agreement_id=g.id and s.state='paid' and s.paid_on>current_date-365 group by a.name order by rebates_paid desc" },
+      { "title": "Rule checks", "sql": "select rule, account, record, issue, source from compliance_gaps order by rule" }
     ]
   }
 ]

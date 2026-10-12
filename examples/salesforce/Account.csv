@@ -1,0 +1,4 @@
+Id,Name,ParentId,BillingCountry,Type
+001DEMO00000001,Waikato Auto Buying Group,,New Zealand,Buying Group
+001DEMO00000002,Te Awamutu Spares,001DEMO00000001,New Zealand,Trade
+001DEMO00000003,Cambridge Motor Supplies,001DEMO00000001,New Zealand,Trade
